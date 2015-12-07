@@ -1,4 +1,4 @@
-OBJS=src/kernel/boot.o src/kernel/kernel.o
+OBJS=src/kernel/boot.o src/kernel/vga.o src/kernel/lib.o src/kernel/kernel.o
 LD_SCRIPT=linker.ld
 LDFLAGS=-Wl,--build-id=none
 CFLAGS=-ffreestanding -O2 -nostdlib -target i686-elf
