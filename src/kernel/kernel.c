@@ -16,7 +16,7 @@ enum vga_color {
 	COLOR_LIGHT_CYAN = 11,
 	COLOR_LIGHT_RED = 12,
 	COLOR_LIGHT_MAGENTA = 13,
-	COLOR_LIGHT_BROWN = 14;
+	COLOR_LIGHT_BROWN = 14,
 	COLOR_WHITE = 15,
 };
 
@@ -53,7 +53,7 @@ void terminal_initialize() {
 	for (size_t y = 0; y < VGA_HEIGHT; y++) {
 		for (size_t x = 0; x < VGA_WIDTH; x++) {
 			const size_t index = y * VGA_WIDTH + x;
-			terminal_buffer[index] = makevgaentry(' ', terminal_color);
+			terminal_buffer[index] = make_vgaentry(' ', terminal_color);
 		}
 	}
 }
@@ -84,7 +84,7 @@ void terminal_writestring(const char* data) {
 }
 
 void kernel_main() {
-	terminal_initalize();
+	terminal_initialize();
 
 	terminal_writestring("Hello, kernel World!\n");
 }
