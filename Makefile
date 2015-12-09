@@ -30,3 +30,7 @@ runiso: iso
 	qemu-system-x86_64 -s -cdrom kernel.iso
 debugiso: iso
 	qemu-system-x86_64 -s -S -cdrom kernel.iso
+debugisogdb: iso
+	qemu-system-x86_64 -s -S -cdrom kernel.iso & gdb -s kernel.bin -ex "target remote localhost:1234" 
+debugisobochs: iso
+	bochs -f bochs.cfg

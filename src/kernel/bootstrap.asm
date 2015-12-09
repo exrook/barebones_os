@@ -80,6 +80,11 @@ _start:
 	add ebx, 0x1000
 	add edi, 8
 	loop .SetEntry
+	
+	; Enable PAE
+	mov eax, cr4
+	or eax, 1 << 5
+	mov cr4, eax
 
 	;Set Long Mode Bit
 	mov ecx, 0xC0000080
@@ -94,6 +99,8 @@ _start:
 
 	; Load GDT
 	lgdt [GDT64.Pointer]
+	push code64
+extern page_init
 	jmp GDT64.Code:code64
 .halt:
 	cli
@@ -104,20 +111,32 @@ _start:
 	jmp .halt
 .NoLongMode:
 	jmp .halt
-GDT64:
-	.Null: equ $ - GDT64
-	dw 0
-	dw 0
-	db 0
-	db 0
-	db 0
-	db 0
-	.Code: equ $ - GDT64
-	dw 0
+GDT64:				;GDT (64 Bit)
+	.Null: equ $ - GDT64	;Null Descriptor
+	dw 0			;
 	dw 0
 	db 0
+	db 0
+	db 0
+	db 0
+	.Code: equ $ - GDT64	;Code Segment Descriptor
+	dw 0			;Segment Descriptor
+	dw 0			;Base Address [0:15]
+	db 0			;Base Address [16:23]
 	db 10011010b
+	;  7  6  5  4  3  2  1  0
+	; |P| DPL | S|    Type   |
+	;  1  0  0  1  1  0  1  0 
+	;  P - Present Bit
+	;  DPL - Descriptor Privilege Level
+	;  Type - Type Field
 	db 00100000b
+	;  7  6  5  4  3  2  1  0
+	; |G| D| L|AVL|   Limit  | 
+	;  0  0  1  0  0  0  0  0
+	; G - 
+	; D - 
+	; L - Long Mode
 	db 0
 	.Data: equ $ - GDT64
 	dw 0
@@ -130,11 +149,11 @@ GDT64:
 	dw $ - GDT64 - 1
 	dq GDT64
 
-BITS 64
+[BITS 64]
 global code64
 code64:
-	; Map kernel memory in page table, then jump to kernel
-	extern page_init
-	call page_init
+	cli
 	extern kernel_main
+	call page_init
+	; Map kernel memory in page table, then jump to kernel
 	jmp kernel_main
