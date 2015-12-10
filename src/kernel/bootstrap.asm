@@ -155,5 +155,9 @@ code64:
 	cli
 	extern kernel_main
 	call page_init
+	cli
+.hang:
+	hlt
+	jmp .hang
 	; Map kernel memory in page table, then jump to kernel
 	jmp kernel_main

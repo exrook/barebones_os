@@ -34,7 +34,7 @@ void page_init() {
 	memclear(kpdt , 512);
 	pt_fill(kpt, 0x0);
 	pml4t[511] = (uint64_t*) ((uint64_t)kpdpt + 0x3); // OR with flags for 0x10 (R/w) and 0x01 (present)
-	kpdpt[0]   = (uint64_t*) ((uint64_t)kpdt + 0x3);
+	kpdpt[510]   = (uint64_t*) ((uint64_t)kpdt + 0x3);
 	kpdt[0]    = (uint64_t*) ((uint64_t)kpt + 0x3);
 	kernel_main();
 	return;
