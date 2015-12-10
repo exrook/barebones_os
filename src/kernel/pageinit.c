@@ -1,8 +1,13 @@
+#include <stddef.h>
 #include <stdint.h>
+#include "kernel.h"
 uint64_t** const pml4t = (void*) 0x1000;
 uint64_t** const pdpt = (void*) 0x2000;
 uint64_t** const pdt = (void*) 0x3000;
 uint64_t** const pt = (void*) 0x4000;
+uint64_t** const kpdpt = (void*) 0x5000;
+uint64_t** const kpdt = (void*) 0x6000;
+uint64_t** const kpt = (void*) 0x7000;
 // Sign Extension
 // 63 62 61 60-59 58 57 56-55 54 53 52-51 50 49 48 
 // |              Sign Extension                 |
@@ -17,15 +22,25 @@ uint64_t** const pt = (void*) 0x4000;
 //  f f f f f f f f 8 0 0 0 0 0 0 0
 // |  SE   |PML4|
 
-void pt_fill(uint64_t** ptp, uint64_t* base) {
-	for (int i = 0; i < 512; i++) {
-		pt[i] = (0x1000*i + base);
+void memclear(uint64_t** mem, const size_t len);
+void pt_fill(uint64_t** ptp, uint64_t base) {
+	for (uint64_t i = 0; i < 512; i++) {
+		ptp[i] = (uint64_t*)(0x1000*i + base + 0x3);
 	}
 }
 
 void page_init() {
-	pml4t[511] = (void*) pdpt;
-	pt[0] = 0x0000;
-	pt_fill(pt, (void*) 0x0);
+	memclear(kpdpt, 512);
+	memclear(kpdt , 512);
+	pt_fill(kpt, 0x0);
+	pml4t[511] = (uint64_t*) ((uint64_t)kpdpt + 0x3); // OR with flags for 0x10 (R/w) and 0x01 (present)
+	kpdpt[0]   = (uint64_t*) ((uint64_t)kpdt + 0x3);
+	kpdt[0]    = (uint64_t*) ((uint64_t)kpt + 0x3);
+	kernel_main();
 	return;
+}
+void memclear(uint64_t** mem, const size_t len) {
+	for (size_t i = 0; i < len; i++) {
+		mem[i] = 0x0;
+	}
 }

@@ -14,10 +14,13 @@ SECTIONS
 	{
 		src/kernel/bootstrap.o (.text)
 		src/kernel/pageinit.o (.text)
+		src/kernel/pageinit.o (.rodata)
 	}
 	.bootstrap_stack :
 	{
 		src/kernel/bootstrap.o (.bss)
+		src/kernel/pageinit.o (.bss)
+		src/kernel/pageinit.o (.data)
 	}
 
 	. += KERNEL_VMA;
