@@ -28,9 +28,20 @@ size_t terminal_column;
 uint8_t terminal_color;
 uint16_t* terminal_buffer;
 
+uint8_t make_color(enum vga_color fg, enum vga_color bg);
+
 void terminal_initialize();
 void terminal_setcolor(uint8_t color);
 void terminal_putentryat(char c, uint8_t color, size_t x, size_t y);
 void terminal_putchar(char c);
 void terminal_writestring(const char* data);
-
+void print_hex64(uint64_t tmp);
+void print_hex32(uint32_t tmp);
+void print_hex16(uint16_t tmp);
+void print_dec64(uint64_t tmp);
+void print_dec32(uint32_t tmp);
+void print_dec16(uint16_t tmp);
+void print_bin64(uint64_t tmp);
+void print_bin32(uint32_t tmp);
+void print_bin16(uint16_t tmp);
+void print_bin8(uint8_t tmp);

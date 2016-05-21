@@ -16,7 +16,10 @@ align 4
 stack_bottom:
 resb 16384
 stack_top:
-
+global multiboot_info_p
+	resw 1
+multiboot_info_p:
+	resq 1
 
 ;Actual code
 section .text
@@ -29,9 +32,12 @@ _start:
 	;jmp .halt
 	;in kernel mode
 	mov esp, stack_top
-	
+	;mov [multiboot_info_p], ebp
+	mov edi, multiboot_info_p
+	mov DWORD [edi], ebx
+
 	;check for CPUID
-	pushfd 
+	pushfd
 	pop eax
 	mov ecx, eax
 	xor eax, 1 << 21
@@ -80,7 +86,7 @@ _start:
 	add ebx, 0x1000
 	add edi, 8
 	loop .SetEntry
-	
+
 	; Enable PAE
 	mov eax, cr4
 	or eax, 1 << 5
@@ -91,7 +97,7 @@ _start:
 	rdmsr
 	or eax, 1 << 8
 	wrmsr
-	
+
 	;Enable Paging
 	mov eax, cr0
 	or eax, 1 << 31
@@ -126,16 +132,16 @@ GDT64:				;GDT (64 Bit)
 	db 10011010b
 	;  7  6  5  4  3  2  1  0
 	; |P| DPL | S|    Type   |
-	;  1  0  0  1  1  0  1  0 
+	;  1  0  0  1  1  0  1  0
 	;  P - Present Bit
 	;  DPL - Descriptor Privilege Level
 	;  Type - Type Field
 	db 00100000b
 	;  7  6  5  4  3  2  1  0
-	; |G| D| L|AVL|   Limit  | 
+	; |G| D| L|AVL|   Limit  |
 	;  0  0  1  0  0  0  0  0
-	; G - 
-	; D - 
+	; G -
+	; D -
 	; L - Long Mode
 	db 0
 	.Data: equ $ - GDT64

@@ -3,13 +3,14 @@ LD_SCRIPT=link.ld
 LDFLAGS=-Wl,--build-id=none
 CFLAGS=-ffreestanding -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O2 -nostdlib -target x86_64--elf -g
 ASMFLAGS=-felf64
+CC=clang
 
 .PHONY: clean run debug
 
 kernel.bin: $(OBJS) $(LD_SCRIPT)
-	clang -T $(LD_SCRIPT) -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS)
+	$(CC) -T $(LD_SCRIPT) -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS)
 %.o: %.c
-	clang -c $< -o $@ $(CFLAGS)
+	$(CC) -c $< -o $@ $(CFLAGS)
 
 %.o: %.asm
 	yasm $(ASMFLAGS) $< -o $@
@@ -31,6 +32,6 @@ runiso: iso
 debugiso: iso
 	qemu-system-x86_64 -s -S -cdrom kernel.iso
 debugisogdb: iso
-	qemu-system-x86_64 -s -S -cdrom kernel.iso & gdb -s kernel.bin -ex "target remote localhost:1234" 
+	qemu-system-x86_64 -s -S -cdrom kernel.iso & gdb -s kernel.bin -ex "target remote localhost:1234"
 debugisobochs: iso
 	bochs-gdb-a20 -f bochs.cfg
