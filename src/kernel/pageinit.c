@@ -1,6 +1,16 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "kernel.h"
+#include "vga.h"
+
+uint32_t* multiboot_info_p;
+
+typedef struct {
+	uint64_t mem_addr;
+	uint64_t mem_length;
+	uint32_t type;
+} meminfo_entry __attribute__((packed));
+
 uint64_t** const pml4t = (void*) 0x1000;
 uint64_t** const pdpt = (void*) 0x2000;
 uint64_t** const pdt = (void*) 0x3000;
@@ -9,12 +19,12 @@ uint64_t** const kpdpt = (void*) 0x5000;
 uint64_t** const kpdt = (void*) 0x6000;
 uint64_t** const kpt = (void*) 0x7000;
 // Sign Extension
-// 63 62 61 60-59 58 57 56-55 54 53 52-51 50 49 48 
+// 63 62 61 60-59 58 57 56-55 54 53 52-51 50 49 48
 // |              Sign Extension                 |
-// 47 46 45 44-43 42 41 40-39 38 37 36-35 34 33 32 
+// 47 46 45 44-43 42 41 40-39 38 37 36-35 34 33 32
 // |          PML4T          |        PDPT
-// 31 30 29 28-27 26 25 24-23 22 21 20-19 18 17 16 
-//      |            PDT           |      PT         
+// 31 30 29 28-27 26 25 24-23 22 21 20-19 18 17 16
+//      |            PDT           |      PT
 // 15 14 13 12-11 10  9  8- 7  6  5  4- 3  2  1  0
 //            |             Offset               |
 // We want to map 0xffffffff80000000-0xffffffffffffffff to
@@ -30,6 +40,33 @@ void pt_fill(uint64_t** ptp, uint64_t base) {
 }
 
 void page_init() {
+	uint32_t flags = multiboot_info_p[0];
+	uint32_t lower_mem_size = multiboot_info_p[1];
+	uint32_t upper_mem_size = multiboot_info_p[2];
+	uint32_t mmap_length = multiboot_info_p[11];
+	uint32_t mmap_addr = multiboot_info_p[12];
+	if (!(flags|(1<<0))) { // Check for lower and upper mem limits, if not return
+		return;
+	}
+	if (!(flags|(1<<6))) { // Check for BIOS Memory Map, if not return
+		return;
+	}
+	uint32_t i = 0;
+	uint8_t* mmap = &(((uint8_t*) mmap_addr)[0]);
+	while (i < mmap_length) {
+		uint32_t size = mmap[i];
+		meminfo_entry* entry = &mmap[i+4];
+		// terminal_writestring("Entry Size: ");
+		// print_dec32(size);
+		// terminal_writestring(" Bytes Mem address: ");
+		// print_hex64(entry->mem_addr);
+		// terminal_writestring("\nMem Size: ");
+		// print_hex64(entry->mem_length);
+		// terminal_writestring(" Bytes Type: ");
+		// print_dec32(entry->type);
+		// terminal_writestring("\n");
+		i = i + size + 4;
+	}
 	memclear(kpdpt, 512);
 	memclear(kpdt , 512);
 	pt_fill(kpt, 0x0);

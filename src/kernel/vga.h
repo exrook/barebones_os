@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#pragma once
+
 enum vga_color {
 	COLOR_BLACK = 0,
 	COLOR_BLUE = 2,

@@ -157,10 +157,23 @@ GDT64:				;GDT (64 Bit)
 
 [BITS 64]
 global code64
+fail_msg:
+; dq 0x0000004C
+	dq 0x0F4C0F490F410F46 ;FAIL in white
+	dq 0x00000C210F440F45 ;ED in white, ! in red
 code64:
 	cli
 	extern kernel_main
 	call page_init
+	;Something is wrong and we returned from the kernel, print FAILED! to the screen
+	mov rcx, fail_msg
+	mov rax, 0xB8000
+	mov rbx, [rcx]
+	mov [rax], rbx
+	add rax, 8
+	add rcx, 8
+	mov rbx, [rcx]
+	mov [rax], rbx
 	cli
 .hang:
 	hlt
