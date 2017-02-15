@@ -33,8 +33,8 @@ _start:
 	;in kernel mode
 	mov esp, stack_top
 	;mov [multiboot_info_p], ebp
-	mov edi, multiboot_info_p
-	mov DWORD [edi], ebx
+	mov edi, multiboot_info_p ;Copy address of multiboot_info_p into edi
+	mov DWORD [edi], ebx ;Save pointer to multiboot info struct (stored in ebx) to address of multiboot_info_p variable
 
 	;check for CPUID
 	pushfd
@@ -64,28 +64,29 @@ _start:
 
 	;Clear memory for paging tables
 	mov edi, 0x1000
-	mov cr3, edi
+	mov cr3, edi ;PML4T at 0x1000
 	xor eax, eax
 	mov ecx, 4096
-	rep stosd
+	rep stosd ;Repeat ECX/4 (1024) times, store EAX (0) to EDI (0x1000), increment EDI by 4
+	; Ends up clearing memory from 0x1000 to 0x2000
 	mov edi, cr3
 
-	;Create Paging Tables in memory
-	mov DWORD [edi], 0x2003
+	;"Create" Paging Tables in memory
+	mov DWORD [edi], 0x2003;First PDPT is at 0x2000
 	add edi, 0x1000
-	mov DWORD [edi], 0x3003
+	mov DWORD [edi], 0x3003;First PDT is at 0x3000
 	add edi, 0x1000
-	mov DWORD [edi], 0x4003
-	add edi, 0x1000
+;	mov DWORD [edi], 0x4003;First PT is at 0x4000
+;	add edi, 0x1000
 
-	mov ebx, 0x00000003
+	mov ebx, 0x00000083; Set Present (bit 1) and R/W bits (bit 2), and 2MB page bit (bit 7)
 	mov ecx, 512
 
-.SetEntry:
+.SetEntry: ;Set Entries in Page Directory to map first 1G addresses into table
 	mov DWORD [edi], ebx
-	add ebx, 0x1000
+	add ebx, 0x200000
 	add edi, 8
-	loop .SetEntry
+	loop .SetEntry ;Decrement ecx and jump to SetEntry if not 0
 
 	; Enable PAE
 	mov eax, cr4

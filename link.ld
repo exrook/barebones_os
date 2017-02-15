@@ -54,6 +54,7 @@ SECTIONS
 	}
 
 	_end = .;
+	_first_free_real_page = ALIGN(4K) - KERNEL_VMA;
 
 	/DISCARD/ :
 	{

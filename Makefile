@@ -1,4 +1,4 @@
-OBJS=src/kernel/bootstrap.o src/kernel/pageinit.o src/kernel/vga.o src/kernel/lib.o src/kernel/kernel.o
+OBJS=src/kernel/bootstrap.o src/kernel/pageinit.o src/kernel/vga.o src/kernel/lib.o src/kernel/kernel.o src/kernel/memory.o
 LD_SCRIPT=link.ld
 LDFLAGS=-Wl,--build-id=none
 CFLAGS=-ffreestanding -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O2 -nostdlib -target x86_64--elf -g

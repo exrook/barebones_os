@@ -5,16 +5,10 @@
 
 uint32_t* multiboot_info_p;
 
-typedef struct {
-	uint64_t mem_addr;
-	uint64_t mem_length;
-	uint32_t type;
-} meminfo_entry __attribute__((packed));
-
 uint64_t** const pml4t = (void*) 0x1000;
 uint64_t** const pdpt = (void*) 0x2000;
 uint64_t** const pdt = (void*) 0x3000;
-uint64_t** const pt = (void*) 0x4000;
+//uint64_t** const pt = (void*) 0x4000;
 uint64_t** const kpdpt = (void*) 0x5000;
 uint64_t** const kpdt = (void*) 0x6000;
 uint64_t** const kpt = (void*) 0x7000;
@@ -45,27 +39,8 @@ void page_init() {
 	uint32_t upper_mem_size = multiboot_info_p[2];
 	uint32_t mmap_length = multiboot_info_p[11];
 	uint32_t mmap_addr = multiboot_info_p[12];
-	if (!(flags|(1<<0))) { // Check for lower and upper mem limits, if not return
-		return;
-	}
 	if (!(flags|(1<<6))) { // Check for BIOS Memory Map, if not return
 		return;
-	}
-	uint32_t i = 0;
-	uint8_t* mmap = &(((uint8_t*) mmap_addr)[0]);
-	while (i < mmap_length) {
-		uint32_t size = mmap[i];
-		meminfo_entry* entry = &mmap[i+4];
-		// terminal_writestring("Entry Size: ");
-		// print_dec32(size);
-		// terminal_writestring(" Bytes Mem address: ");
-		// print_hex64(entry->mem_addr);
-		// terminal_writestring("\nMem Size: ");
-		// print_hex64(entry->mem_length);
-		// terminal_writestring(" Bytes Type: ");
-		// print_dec32(entry->type);
-		// terminal_writestring("\n");
-		i = i + size + 4;
 	}
 	memclear(kpdpt, 512);
 	memclear(kpdt , 512);
