@@ -18,7 +18,7 @@ void kernel_main() {
 	setup_memory(multiboot_info_p);
 	print_memmap();
 	terminal_writestring("\nKERNEL:");
-	print_hex64(kernel_main);
+	print_hex64((uint64_t)kernel_main);
 }
 
 //typedef struct __attribute__((packed)) {
@@ -50,7 +50,7 @@ void print_memmap() {
 	}
 	if (flags|(1<<2)) {
 		terminal_writestring("Bootloader cmdline: \"");
-		terminal_writestring((char*) cmdline);
+		terminal_writestring((char*)(uint64_t) cmdline);
 		terminal_writestring("\"\n");
 	}
 	if (flags|(1<<6)) {
@@ -105,5 +105,5 @@ void print_memmap() {
 		}
 	}
 	terminal_writestring("\n\n\nmmmm\n\n\n");
-	terminal_writestring((char*) bootloader_name);
+	terminal_writestring((char*) (uint64_t)bootloader_name);
 }

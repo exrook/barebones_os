@@ -19,6 +19,7 @@ stack_top:
 global multiboot_info_p
 	resw 1
 multiboot_info_p:
+align 8
 	resq 1
 
 ;Actual code
